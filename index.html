@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strava Stat Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #0e1111;
+            color: #ffffff;
+            padding: 16px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: #1a1d20;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            margin-bottom: 16px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-bottom: 14px;
+            color: #fc5200;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: #9ca3af;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            background: #2d3139;
+            border: 1px solid #3f444e;
+            border-radius: 6px;
+            padding: 8px 10px;
+            color: white;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #fc5200;
+        }
+
+        /* Styling Pilihan Tipe Data */
+        .type-selector {
+            display: flex;
+            gap: 10px;
+            background: #20232a;
+            padding: 4px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .type-option {
+            flex: 1;
+            text-align: center;
+        }
+
+        .type-option input {
+            display: none;
+        }
+
+        .type-option label {
+            display: block;
+            padding: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #9ca3af;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .type-option input:checked + label {
+            background: #fc5200;
+            color: white;
+        }
+
+        /* Styling Toggle Tampilkan / Sembunyikan */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #2d3139;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 6px;
+        }
+
+        .toggle-container span {
+            font-size: 0.8rem;
+            color: #d1d5db;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input { display: none; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #4b5563;
+            transition: .3s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: #10b981; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Preview Wrapper */
+        .preview-wrapper {
+            width: 100%;
+            max-width: 480px;
+            background: #262626;
+            padding: 16px 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- Elemen Kartu Statistik Utama --- */
+        #stat-card {
+            width: 100%;
+            background: transparent;
+            padding: 8px 4px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            row-gap: 18px; 
+            column-gap: 8px; 
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            transition: opacity 0.2s;
+        }
+
+        /* Utility class untuk menyembunyikan elemen saat render gambar */
+        .hidden-element {
+            opacity: 0 !important;
+            visibility: hidden;
+        }
+
+        .stat-label {
+            font-size: 10pt;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2px;
+            letter-spacing: 0.01em;
+        }
+
+        .stat-value {
+            font-size: 17pt;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1.2;
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+        }
+
+        /* Tombol Aksi */
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-download {
+            background-color: #fc5200;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background-color: #e04900;
+        }
+
+        .btn-copy {
+            background-color: #3f444e;
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background-color: #4f5562;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #toast.show { opacity: 1; }
+
+        .note {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 8px;
+            text-align: center;
+            line-height: 1.4;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Strava Stat Generator</h2>
+        
+        <div class="input-group">
+            <label for="distance">Distance (km)</label>
+            <input type="number" id="distance" value="42.89" step="0.01" min="0">
+        </div>
+
+        <div class="input-group">
+            <label>Pace (/km)</label>
+            <div class="input-row">
+                <input type="number" id="pace-min" value="6" placeholder="Menit" min="0">
+                <input type="number" id="pace-sec" value="21" placeholder="Detik" min="0" max="59">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="time-display">Time (Bisa diubah manual)</label>
+            <input type="text" id="time-display" value="4h 32m">
+        </div>
+
+        <div class="input-row">
+            <div class="input-group" style="flex: 1;">
+                <label for="calories">Calories</label>
+                <input type="text" id="calories" value="4,313">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label for="elev-gain">Elev Gain</label>
+                <input type="number" id="elev-gain" value="135">
+            </div>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 0;">
+            <label>Opsi Kolom Ke-6</label>
+            
+            <div class="type-selector">
+                <div class="type-option">
+                    <input type="radio" id="select-hr" name="stat-type" value="hr" checked>
+                    <label for="select-hr">Avg HR</label>
+                </div>
+                <div class="type-option">
+                    <input type="radio" id="select-steps" name="stat-type" value="steps">
+                    <label for="select-steps">Steps</label>
+                </div>
+            </div>
+
+            <input type="text" id="dynamic-input" value="154" placeholder="Masukkan nilai...">
+
+            <div class="toggle-container">
+                <span>Tampilkan di gambar</span>
+                <label class="switch">
+                    <input type="checkbox" id="toggle-visible" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 4px; font-weight: 500; width:100%; max-width:480px; text-align:left; padding-left:4px;">Live Preview (Transparan):</div>
+    <div class="preview-wrapper">
+        <div id="stat-card">
+            <div class="stat-box">
+                <div class="stat-label">Distance</div>
+                <div class="stat-value" id="val-distance">42.89 km</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Pace</div>
+                <div class="stat-value" id="val-pace">6:21 /km</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Cal</div>
+                <div class="stat-value" id="val-cal">4,313 Cal</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Time</div>
+                <div class="stat-value" id="val-time">4h 32m</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Elev Gain</div>
+                <div class="stat-value" id="val-elev">135 m</div>
+            </div>
+            
+            <div class="stat-box" id="box-dynamic">
+                <div class="stat-label" id="val-dynamic-label">Avg HR</div>
+                <div class="stat-value" id="val-dynamic-value">154 bpm</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-container">
+        <button class="btn-download" onclick="downloadImage()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Download Transparan PNG
+        </button>
+        <button class="btn-copy" onclick="copyToClipboard()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+            Salin Gambar ke Clipboard
+        </button>
+        <div class="note">*Hasil ekspor berupa PNG transparan tanpa latar belakang.</div>
+    </div>
+
+    <div id="toast">Berhasil disalin!</div>
+
+    <script>
+        const inputDistance = document.getElementById('distance');
+        const inputPaceMin = document.getElementById('pace-min');
+        const inputPaceSec = document.getElementById('pace-sec');
+        const inputTime = document.getElementById('time-display');
+        const inputCalories = document.getElementById('calories');
+        const inputElevGain = document.getElementById('elev-gain');
+        
+        // Elemen Kontrol Baru
+        const radioHR = document.getElementById('select-hr');
+        const radioSteps = document.getElementById('select-steps');
+        const inputDynamic = document.getElementById('dynamic-input');
+        const toggleVisible = document.getElementById('toggle-visible');
+
+        const valDistance = document.getElementById('val-distance');
+        const valPace = document.getElementById('val-pace');
+        const valCal = document.getElementById('val-cal');
+        const valTime = document.getElementById('val-time');
+        const valElev = document.getElementById('val-elev');
+        
+        // Elemen Preview Baru
+        const boxDynamic = document.getElementById('box-dynamic');
+        const valDynamicLabel = document.getElementById('val-dynamic-label');
+        const valDynamicValue = document.getElementById('val-dynamic-value');
+        const toast = document.getElementById('toast');
+
+        function autoCalculateTime() {
+            const distance = parseFloat(inputDistance.value) || 0;
+            const paceMin = parseInt(inputPaceMin.value) || 0;
+            const paceSec = parseInt(inputPaceSec.value) || 0;
+
+            if (distance <= 0 || (paceMin === 0 && paceSec === 0)) return;
+
+            const totalPaceSeconds = (paceMin * 60) + paceSec;
+            const totalTimeSeconds = Math.round(distance * totalPaceSeconds);
+
+            const hours = Math.floor(totalTimeSeconds / 3600);
+            const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
+
+            let timeString = "";
+            if (hours > 0) timeString += `${hours}h `;
+            timeString += `${minutes}m`;
+            
+            inputTime.value = timeString;
+            valTime.innerText = timeString;
+        }
+
+        function updateCardText() {
+            // 1. Update elemen konvensional
+            valDistance.innerText = `${parseFloat(inputDistance.value) || 0} km`;
+
+            const pMin = inputPaceMin.value || "0";
+            let pSec = inputPaceSec.value || "0";
+            if (parseInt(pSec) < 10 && pSec.length === 1) pSec = "0" + pSec;
+            valPace.innerText = `${pMin}:${pSec} /km`;
+
+            valTime.innerText = inputTime.value;
+            valCal.innerText = inputCalories.value ? `${inputCalories.value} Cal` : "0 Cal";
+            valElev.innerText = `${inputElevGain.value || 0} m`;
+
+            // 2. Update Opsi Dinamis (HR / Steps)
+            const isHR = radioHR.checked;
+            const rawValue = inputDynamic.value || "0";
+
+            if (isHR) {
+                valDynamicLabel.innerText = "Avg HR";
+                valDynamicValue.innerText = `${rawValue} bpm`;
+            } else {
+                valDynamicLabel.innerText = "Steps";
+                // Memformat angka ribuan dengan koma jika berupa nomor bersih
+                const formattedSteps = isNaN(rawValue.replace(/,/g, '')) ? rawValue : Number(rawValue.replace(/,/g, '')).toLocaleString('en-US');
+                valDynamicValue.innerText = formattedSteps;
+            }
+
+            // 3. Kontrol Visibilitas Box Ke-6
+            if (toggleVisible.checked) {
+                boxDynamic.classList.remove('hidden-element');
+            } else {
+                boxDynamic.classList.add('hidden-element');
+            }
+        }
+
+        // Event Listener untuk sinkronisasi otomatis
+        [inputDistance, inputPaceMin, inputPaceSec].forEach(el => {
+            el.addEventListener('input', () => {
+                autoCalculateTime();
+                updateCardText();
+            });
+        });
+
+        [inputTime, inputCalories, inputElevGain, inputDynamic].forEach(el => {
+            el.addEventListener('input', updateCardText);
+        });
+
+        // Trigger update jika opsi radio atau sakelar visibilitas diklik
+        [radioHR, radioSteps, toggleVisible].forEach(el => {
+            el.addEventListener('change', updateCardText);
+        });
+
+        // Setup Nilai Default Saat Pertama Kali Dimuat
+        autoCalculateTime();
+        updateCardText();
+
+        function getCanvasOptions(element) {
+            return {
+                backgroundColor: null,
+                scale: 3, 
+                useCORS: true,
+                width: element.offsetWidth,
+                height: element.offsetHeight,
+                scrollX: 0,
+                scrollY: 0
+            };
+        }
+
+        function downloadImage() {
+            const card = document.getElementById('stat-card');
+            html2canvas(card, getCanvasOptions(card)).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `strava_stats.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function copyToClipboard() {
+            const card = document.getElementById('stat-card');
+            html2canvas(card, getCanvasOptions(card)).then(canvas => {
+                canvas.toBlob(blob => {
+                    if (navigator.clipboard && navigator.clipboard.write) {
+                        const item = new ClipboardItem({ "image/png": blob });
+                        navigator.clipboard.write([item]).then(() => {
+                            showToast("Gambar berhasil disalin!");
+                        }).catch(() => showToast("Gagal menyalin, silakan unduh"));
+                    } else {
+                        showToast("Browser Anda belum mendukung fitur ini.");
+                    }
+                }, 'image/png');
+            });
+        }
+
+        function showToast(message) {
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+    </script>
+</body>
+</html>
