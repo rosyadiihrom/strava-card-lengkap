@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strava Stat Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #0e1111;
+            color: #ffffff;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: #1a1d20;
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: #fc5200;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-group {
+            flex: 1;
+            background: #23272f;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #2d3139;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .group-header label {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            font-weight: 600;
+        }
+
+        .vis-check {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.7rem;
+            color: #10b981;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .vis-check input {
+            width: auto;
+            accent-color: #10b981;
+            cursor: pointer;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        input {
+            width: 100%;
+            background: #2d3139;
+            border: 1px solid #3f444e;
+            border-radius: 5px;
+            padding: 6px 8px;
+            color: white;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #fc5200;
+        }
+
+        .type-selector {
+            display: flex;
+            gap: 4px;
+            background: #1a1d20;
+            padding: 2px;
+            border-radius: 5px;
+            margin-bottom: 4px;
+        }
+
+        .type-option {
+            flex: 1;
+            text-align: center;
+        }
+
+        .type-option input { display: none; }
+
+        .type-option label {
+            display: block;
+            padding: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #9ca3af;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .type-option input:checked + label {
+            background: #fc5200;
+            color: white;
+        }
+
+        .preview-wrapper {
+            width: 100%;
+            max-width: 480px;
+            background: #262626;
+            padding: 18px 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- Elemen Kartu Statistik Utama --- */
+        #stat-card {
+            width: 100%;
+            background: transparent;
+            padding: 4px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            row-gap: 20px; 
+            column-gap: 10px; 
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .hidden-box {
+            display: none !important;
+        }
+
+        .stat-label {
+            font-size: 10pt;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2px;
+            letter-spacing: 0.01em;
+        }
+
+        .stat-value {
+            font-size: 17pt;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1.2;
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+        }
+
+        /* Tombol Aksi */
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        button {
+            width: 100%;
+            padding: 11px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-download { background-color: #fc5200; color: white; }
+        .btn-download:hover { background-color: #e04900; }
+        .btn-copy { background-color: #3f444e; color: white; }
+        .btn-copy:hover { background-color: #4f5562; }
+
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 100;
+        }
+        #toast.show { opacity: 1; }
+
+        .note {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 6px;
+            text-align: center;
+            line-height: 1.4;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Strava Stat Generator</h2>
+        
+        <div class="form-row">
+            <div class="input-group">
+                <div class="group-header">
+                    <label for="distance">Distance</label>
+                    <label class="vis-check"><input type="checkbox" id="show-dist" checked> Show</label>
+                </div>
+                <input type="number" id="distance" value="42.89" step="0.01" min="0">
+            </div>
+
+            <div class="input-group">
+                <div class="group-header">
+                    <label>Pace</label>
+                    <label class="vis-check"><input type="checkbox" id="show-pace" checked> Show</label>
+                </div>
+                <div class="input-row">
+                    <input type="number" id="pace-min" value="6" placeholder="Min" min="0">
+                    <input type="number" id="pace-sec" value="21" placeholder="Det" min="0" max="59">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="input-group">
+                <div class="group-header">
+                    <label for="time-display">Time</label>
+                    <label class="vis-check"><input type="checkbox" id="show-time" checked> Show</label>
+                </div>
+                <input type="text" id="time-display" value="4h 32m 24s">
+            </div>
+
+            <div class="input-group">
+                <div class="group-header">
+                    <label for="calories">Calories</label>
+                    <label class="vis-check"><input type="checkbox" id="show-cal" checked> Show</label>
+                </div>
+                <input type="text" id="calories" value="4,313">
+            </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 0;">
+            <div class="input-group">
+                <div class="group-header">
+                    <label for="elev-gain">Elev Gain</label>
+                    <label class="vis-check"><input type="checkbox" id="show-elev" checked> Show</label>
+                </div>
+                <input type="number" id="elev-gain" value="135">
+            </div>
+
+            <div class="input-group">
+                <div class="group-header">
+                    <label>Kolom Ke-6</label>
+                    <label class="vis-check"><input type="checkbox" id="show-dynamic" checked> Show</label>
+                </div>
+                <div class="type-selector">
+                    <div class="type-option">
+                        <input type="radio" id="select-hr" name="stat-type" value="hr" checked>
+                        <label for="select-hr">HR</label>
+                    </div>
+                    <div class="type-option">
+                        <input type="radio" id="select-steps" name="stat-type" value="steps">
+                        <label for="select-steps">Steps</label>
+                    </div>
+                </div>
+                <input type="text" id="dynamic-input" value="154">
+            </div>
+        </div>
+    </div>
+
+    <div style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 4px; font-weight: 500; width:100%; max-width:480px; text-align:left; padding-left:4px;">Live Preview (Transparan):</div>
+    <div class="preview-wrapper">
+        <div id="stat-card">
+            <div class="stat-box" id="box-dist">
+                <div class="stat-label">Distance</div>
+                <div class="stat-value" id="val-distance">42.89 km</div>
+            </div>
+            <div class="stat-box" id="box-pace">
+                <div class="stat-label">Pace</div>
+                <div class="stat-value" id="val-pace">6:21 /km</div>
+            </div>
+            <div class="stat-box" id="box-time">
+                <div class="stat-label">Time</div>
+                <div class="stat-value" id="val-time">4h 32m 24s</div>
+            </div>
+            <div class="stat-box" id="box-cal">
+                <div class="stat-label">Cal</div>
+                <div class="stat-value" id="val-cal">4,313 Cal</div>
+            </div>
+            <div class="stat-box" id="box-elev">
+                <div class="stat-label">Elev Gain</div>
+                <div class="stat-value" id="val-elev">135 m</div>
+            </div>
+            <div class="stat-box" id="box-dynamic">
+                <div class="stat-label" id="val-dynamic-label">Avg HR</div>
+                <div class="stat-value" id="val-dynamic-value">154 bpm</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-container">
+        <button class="btn-download" onclick="downloadImage()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Download Transparan PNG
+        </button>
+        <button class="btn-copy" onclick="copyToClipboard()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+            Salin Gambar ke Clipboard
+        </button>
+        <div class="note">*Harap gunakan dengan bijak yaa.</div>
+    </div>
+
+    <div id="toast">Berhasil disalin!</div>
+
+    <script>
+        const inputDistance = document.getElementById('distance');
+        const inputPaceMin = document.getElementById('pace-min');
+        const inputPaceSec = document.getElementById('pace-sec');
+        const inputTime = document.getElementById('time-display');
+        const inputCalories = document.getElementById('calories');
+        const inputElevGain = document.getElementById('elev-gain');
+        const radioHR = document.getElementById('select-hr');
+        const radioSteps = document.getElementById('select-steps');
+        const inputDynamic = document.getElementById('dynamic-input');
+
+        const checkDist = document.getElementById('show-dist');
+        const checkPace = document.getElementById('show-pace');
+        const checkTime = document.getElementById('show-time');
+        const checkCal = document.getElementById('show-cal');
+        const checkElev = document.getElementById('show-elev');
+        const checkDynamic = document.getElementById('show-dynamic');
+
+        const boxDist = document.getElementById('box-dist');
+        const boxPace = document.getElementById('box-pace');
+        const boxTime = document.getElementById('box-time');
+        const boxCal = document.getElementById('box-cal');
+        const boxElev = document.getElementById('box-elev');
+        const boxDynamic = document.getElementById('box-dynamic');
+
+        const valDistance = document.getElementById('val-distance');
+        const valPace = document.getElementById('val-pace');
+        const valCal = document.getElementById('val-cal');
+        const valTime = document.getElementById('val-time');
+        const valElev = document.getElementById('val-elev');
+        const valDynamicLabel = document.getElementById('val-dynamic-label');
+        const valDynamicValue = document.getElementById('val-dynamic-value');
+        const toast = document.getElementById('toast');
+
+        // Fungsi Kalkulasi Otomatis Diperbarui hingga hitungan Detik (s)
+        function autoCalculateTime() {
+            const distance = parseFloat(inputDistance.value) || 0;
+            const paceMin = parseInt(inputPaceMin.value) || 0;
+            const paceSec = parseInt(inputPaceSec.value) || 0;
+
+            if (distance <= 0 || (paceMin === 0 && paceSec === 0)) return;
+
+            const totalPaceSeconds = (paceMin * 60) + paceSec;
+            const totalTimeSeconds = Math.round(distance * totalPaceSeconds);
+
+            const hours = Math.floor(totalTimeSeconds / 3600);
+            const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
+            const seconds = totalTimeSeconds % 60; // Mendapatkan sisa detik
+
+            let timeString = "";
+            if (hours > 0) timeString += `${hours}h `;
+            if (minutes > 0 || hours > 0) timeString += `${minutes}m `;
+            timeString += `${seconds}s`;
+            
+            inputTime.value = timeString;
+            valTime.innerText = timeString;
+        }
+
+        function updateCardText() {
+            valDistance.innerText = `${parseFloat(inputDistance.value) || 0} km`;
+
+            const pMin = inputPaceMin.value || "0";
+            let pSec = inputPaceSec.value || "0";
+            if (parseInt(pSec) < 10 && pSec.length === 1) pSec = "0" + pSec;
+            valPace.innerText = `${pMin}:${pSec} /km`;
+
+            valTime.innerText = inputTime.value;
+            valCal.innerText = inputCalories.value ? `${inputCalories.value} Cal` : "0 Cal";
+            valElev.innerText = `${inputElevGain.value || 0} m`;
+
+            if (radioHR.checked) {
+                valDynamicLabel.innerText = "Avg HR";
+                valDynamicValue.innerText = `${inputDynamic.value || 0} bpm`;
+            } else {
+                valDynamicLabel.innerText = "Steps";
+                const rawSteps = inputDynamic.value || "0";
+                const formattedSteps = isNaN(rawSteps.replace(/,/g, '')) ? rawSteps : Number(rawSteps.replace(/,/g, '')).toLocaleString('en-US');
+                valDynamicValue.innerText = formattedSteps;
+            }
+
+            checkDist.checked ? boxDist.classList.remove('hidden-box') : boxDist.classList.add('hidden-box');
+            checkPace.checked ? boxPace.classList.remove('hidden-box') : boxPace.classList.add('hidden-box');
+            checkTime.checked ? boxTime.classList.remove('hidden-box') : boxTime.classList.add('hidden-box');
+            checkCal.checked ? boxCal.classList.remove('hidden-box') : boxCal.classList.add('hidden-box');
+            checkElev.checked ? boxElev.classList.remove('hidden-box') : boxElev.classList.add('hidden-box');
+            checkDynamic.checked ? boxDynamic.classList.remove('hidden-box') : boxDynamic.classList.add('hidden-box');
+        }
+
+        [inputDistance, inputPaceMin, inputPaceSec].forEach(el => {
+            el.addEventListener('input', () => {
+                autoCalculateTime();
+                updateCardText();
+            });
+        });
+
+        [inputTime, inputCalories, inputElevGain, inputDynamic].forEach(el => {
+            el.addEventListener('input', updateCardText);
+        });
+
+        [checkDist, checkPace, checkTime, checkCal, checkElev, checkDynamic, radioHR, radioSteps].forEach(el => {
+            el.addEventListener('change', updateCardText);
+        });
+
+        autoCalculateTime();
+        updateCardText();
+
+        function getCanvasOptions(element) {
+            return {
+                backgroundColor: null,
+                scale: 3, 
+                useCORS: true,
+                width: element.offsetWidth,
+                height: element.offsetHeight,
+                scrollX: 0,
+                scrollY: 0
+            };
+        }
+
+        function downloadImage() {
+            const card = document.getElementById('stat-card');
+            html2canvas(card, getCanvasOptions(card)).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `strava_custom_stats.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function copyToClipboard() {
+            const card = document.getElementById('stat-card');
+            html2canvas(card, getCanvasOptions(card)).then(canvas => {
+                canvas.toBlob(blob => {
+                    if (navigator.clipboard && navigator.clipboard.write) {
+                        const item = new ClipboardItem({ "image/png": blob });
+                        navigator.clipboard.write([item]).then(() => {
+                            showToast("Gambar berhasil disalin!");
+                        }).catch(() => showToast("Gagal menyalin, gunakan download"));
+                    } else {
+                        showToast("Browser tidak mendukung salin langsung.");
+                    }
+                }, 'image/png');
+            });
+        }
+
+        function showToast(message) {
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+    </script>
+</body>
+</html>
