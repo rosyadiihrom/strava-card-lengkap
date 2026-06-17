@@ -279,7 +279,7 @@
                     <label for="time-display">Time</label>
                     <label class="vis-check"><input type="checkbox" id="show-time" checked> Show</label>
                 </div>
-                <input type="text" id="time-display" value="2h 8m 39s">
+                <input type="text" id="time-display" value="2h 8m">
             </div>
 
             <div class="input-group">
@@ -287,7 +287,7 @@
                     <label for="calories">Calories</label>
                     <label class="vis-check"><input type="checkbox" id="show-cal" checked> Show</label>
                 </div>
-                <input type="text" id="calories" value="756">
+                <input type="text" id="calories" value="750">
             </div>
         </div>
 
@@ -333,15 +333,15 @@
             </div>
             <div class="stat-box" id="box-time">
                 <div class="stat-label">Time</div>
-                <div class="stat-value" id="val-time">2h 8m 39s</div>
+                <div class="stat-value" id="val-time">2h 8m</div>
             </div>
             <div class="stat-box" id="box-cal">
                 <div class="stat-label">Cal</div>
-                <div class="stat-value" id="val-cal">756 Cal</div>
+                <div class="stat-value" id="val-cal">750 Cal</div>
             </div>
             <div class="stat-box" id="box-elev">
                 <div class="stat-label">Elev Gain</div>
-                <div class="stat-value" id="val-elev">15 m</div>
+                <div class="stat-value" id="val-elev">13 m</div>
             </div>
             <div class="stat-box" id="box-dynamic">
                 <div class="stat-label" id="val-dynamic-label">Avg HR</div>
@@ -398,7 +398,7 @@
         const valDynamicValue = document.getElementById('val-dynamic-value');
         const toast = document.getElementById('toast');
 
-        // Fungsi Kalkulasi Otomatis Diperbarui hingga hitungan Detik (s)
+        // Fungsi Kalkulasi Otomatis Dinamis: Menyembunyikan detik jika waktu >= 1 Jam
         function autoCalculateTime() {
             const distance = parseFloat(inputDistance.value) || 0;
             const paceMin = parseInt(inputPaceMin.value) || 0;
@@ -411,12 +411,18 @@
 
             const hours = Math.floor(totalTimeSeconds / 3600);
             const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
-            const seconds = totalTimeSeconds % 60; // Mendapatkan sisa detik
+            const seconds = totalTimeSeconds % 60;
 
             let timeString = "";
-            if (hours > 0) timeString += `${hours}h `;
-            if (minutes > 0 || hours > 0) timeString += `${minutes}m `;
-            timeString += `${seconds}s`;
+            if (hours > 0) {
+                // Aturan: Jika lebih atau sama dengan 1 jam, Tampilkan jam & menit saja (Detik hilang)
+                timeString += `${hours}h`;
+                if (minutes > 0) timeString += ` ${minutes}m`;
+            } else {
+                // Aturan: Jika kurang dari 1 jam, Tampilkan menit & detik lengkap
+                if (minutes > 0) timeString += `${minutes}m `;
+                timeString += `${seconds}s`;
+            }
             
             inputTime.value = timeString;
             valTime.innerText = timeString;
