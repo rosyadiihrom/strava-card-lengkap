@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strava Stat Generator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Mengubah font menjadi Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -13,7 +14,8 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            /* Mengubah font-family menjadi Montserrat */
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #0e1111;
             color: #ffffff;
             padding: 12px 8px;
@@ -161,7 +163,8 @@
             grid-template-columns: repeat(3, 1fr);
             row-gap: 20px; 
             column-gap: 10px; 
-            font-family: 'Inter', sans-serif;
+            /* Mengubah font-family menjadi Montserrat */
+            font-family: 'Montserrat', sans-serif;
             box-sizing: border-box;
         }
 
@@ -185,11 +188,11 @@
 
         .stat-value {
             font-size: 17pt;
-            font-weight: 600;
+            font-weight: 700; /* Ditingkatkan ke 700 agar angka Montserrat lebih tegas khas Strava */
             color: #ffffff;
             line-height: 1.2;
             white-space: nowrap;
-            letter-spacing: 0.01em;
+            letter-spacing: -0.01em;
         }
 
         /* Tombol Aksi */
@@ -214,6 +217,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            font-family: inherit;
         }
 
         .btn-download { background-color: #fc5200; color: white; }
@@ -398,7 +402,6 @@
         const valDynamicValue = document.getElementById('val-dynamic-value');
         const toast = document.getElementById('toast');
 
-        // Fungsi Kalkulasi Otomatis Dinamis: Menyembunyikan detik jika waktu >= 1 Jam
         function autoCalculateTime() {
             const distance = parseFloat(inputDistance.value) || 0;
             const paceMin = parseInt(inputPaceMin.value) || 0;
@@ -415,11 +418,9 @@
 
             let timeString = "";
             if (hours > 0) {
-                // Aturan: Jika lebih atau sama dengan 1 jam, Tampilkan jam & menit saja (Detik hilang)
                 timeString += `${hours}h`;
                 if (minutes > 0) timeString += ` ${minutes}m`;
             } else {
-                // Aturan: Jika kurang dari 1 jam, Tampilkan menit & detik lengkap
                 if (minutes > 0) timeString += `${minutes}m `;
                 timeString += `${seconds}s`;
             }
