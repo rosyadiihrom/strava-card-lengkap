@@ -143,7 +143,7 @@
             width: 100%;
             max-width: 480px;
             background: #262626;
-            padding: 24px 12px; /* Ditambah sedikit padding vertical agar space seimbang */
+            padding: 24px 14px;
             border-radius: 12px;
             margin-bottom: 12px;
             display: flex;
@@ -157,16 +157,40 @@
             width: 100%;
             background: transparent;
             padding: 4px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            row-gap: 24px; /* Diberi jarak lebih karena efek mengkerut mengurangi tinggi box */
-            column-gap: 10px; 
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Jarak pasca logo diperbesar */
             font-family: 'Montserrat', sans-serif;
             box-sizing: border-box;
 
-            /* Trik CSS: Menceperkan seluruh isi kartu statistik ke bawah secara serentak */
-            transform: scaleY(0.85);
+            /* Menceperkan seluruh isi kartu statistik ke bawah secara serentak */
+            transform: scaleY(0.80);
             transform-origin: center center;
+        }
+
+        /* Pembungkus Logo Strava di Atas Kiri */
+        .logo-wrapper {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            width: 100%;
+            padding-left: 2px;
+            margin-bottom: 4px; /* Memberikan sedikit ruang bernafas di bawah logo */
+        }
+
+        .logo-wrapper img {
+            height: 40px; /* Diperbesar dari 22px agar lebih mantap */
+            width: auto;
+            display: block;
+        }
+
+        /* Grid khusus untuk angka statistik */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            row-gap: 20px;
+            column-gap: 10px;
+            width: 100%;
         }
 
         .stat-box {
@@ -189,7 +213,7 @@
 
         .stat-value {
             font-size: 17pt;
-            font-weight: 590; 
+            font-weight: 600; 
             color: #ffffff;
             white-space: nowrap;
             letter-spacing: -0.01em;
@@ -328,29 +352,35 @@
     <div style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 4px; font-weight: 500; width:100%; max-width:480px; text-align:left; padding-left:4px;">Live Preview (Transparan):</div>
     <div class="preview-wrapper">
         <div id="stat-card">
-            <div class="stat-box" id="box-dist">
-                <div class="stat-label">Distance</div>
-                <div class="stat-value" id="val-distance">20.26 km</div>
+            <div class="logo-wrapper">
+                <img src="strav_logo.png" alt="Strava Logo">
             </div>
-            <div class="stat-box" id="box-pace">
-                <div class="stat-label">Pace</div>
-                <div class="stat-value" id="val-pace">6:21 /km</div>
-            </div>
-            <div class="stat-box" id="box-time">
-                <div class="stat-label">Time</div>
-                <div class="stat-value" id="val-time">2h 8m</div>
-            </div>
-            <div class="stat-box" id="box-cal">
-                <div class="stat-label">Cal</div>
-                <div class="stat-value" id="val-cal">750 Cal</div>
-            </div>
-            <div class="stat-box" id="box-elev">
-                <div class="stat-label">Elev Gain</div>
-                <div class="stat-value" id="val-elev">13 m</div>
-            </div>
-            <div class="stat-box" id="box-dynamic">
-                <div class="stat-label" id="val-dynamic-label">Avg HR</div>
-                <div class="stat-value" id="val-dynamic-value">154 bpm</div>
+            
+            <div class="stat-grid">
+                <div class="stat-box" id="box-dist">
+                    <div class="stat-label">Distance</div>
+                    <div class="stat-value" id="val-distance">20.26 km</div>
+                </div>
+                <div class="stat-box" id="box-pace">
+                    <div class="stat-label">Pace</div>
+                    <div class="stat-value" id="val-pace">6:21 /km</div>
+                </div>
+                <div class="stat-box" id="box-time">
+                    <div class="stat-label">Time</div>
+                    <div class="stat-value" id="val-time">2h 8m</div>
+                </div>
+                <div class="stat-box" id="box-cal">
+                    <div class="stat-label">Cal</div>
+                    <div class="stat-value" id="val-cal">750 Cal</div>
+                </div>
+                <div class="stat-box" id="box-elev">
+                    <div class="stat-label">Elev Gain</div>
+                    <div class="stat-value" id="val-elev">13 m</div>
+                </div>
+                <div class="stat-box" id="box-dynamic">
+                    <div class="stat-label" id="val-dynamic-label">Avg HR</div>
+                    <div class="stat-value" id="val-dynamic-value">154 bpm</div>
+                </div>
             </div>
         </div>
     </div>
