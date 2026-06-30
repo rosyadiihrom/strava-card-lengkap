@@ -159,11 +159,9 @@
             padding: 4px;
             display: flex;
             flex-direction: column;
-            gap: 20px; /* Jarak pasca logo diperbesar */
+            gap: 20px;
             font-family: 'Montserrat', sans-serif;
             box-sizing: border-box;
-
-            /* Menceperkan seluruh isi kartu statistik ke bawah secara serentak */
             transform: scaleY(0.9);
             transform-origin: center center;
         }
@@ -175,11 +173,11 @@
             align-items: center;
             width: 100%;
             padding-left: 2px;
-            margin-bottom: 4px; /* Memberikan sedikit ruang bernafas di bawah logo */
+            margin-bottom: 4px;
         }
 
         .logo-wrapper img {
-            height: 45px; /* Diperbesar dari 22px agar lebih mantap */
+            height: 45px;
             width: auto;
             display: block;
         }
@@ -281,6 +279,23 @@
     <div class="container">
         <h2>Strava Stat Generator</h2>
         
+        <!-- Pilihan Mode Aktivitas -->
+        <div class="form-row">
+            <div class="input-group" style="flex-direction: row; align-items: center; justify-content: space-between; padding: 10px;">
+                <span style="font-size: 0.8rem; font-weight: 600; color: #9ca3af;">Activity Type:</span>
+                <div class="type-selector" style="margin-bottom: 0; width: 60%;">
+                    <div class="type-option">
+                        <input type="radio" id="mode-run" name="activity-mode" value="run" checked>
+                        <label for="mode-run">Running</label>
+                    </div>
+                    <div class="type-option">
+                        <input type="radio" id="mode-ride" name="activity-mode" value="ride">
+                        <label for="mode-ride">Cycling</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="form-row">
             <div class="input-group">
                 <div class="group-header">
@@ -292,12 +307,15 @@
 
             <div class="input-group">
                 <div class="group-header">
-                    <label>Pace</label>
+                    <label id="label-pace-speed">Pace</label>
                     <label class="vis-check"><input type="checkbox" id="show-pace" checked> Show</label>
                 </div>
-                <div class="input-row">
+                <div class="input-row" id="container-pace-inputs">
                     <input type="number" id="pace-min" value="6" placeholder="Min" min="0">
                     <input type="number" id="pace-sec" value="21" placeholder="Det" min="0" max="59">
+                </div>
+                <div class="input-row hidden-box" id="container-speed-input">
+                    <input type="number" id="speed-val" value="13.1" step="0.1" min="0" placeholder="km/h">
                 </div>
             </div>
         </div>
@@ -335,13 +353,17 @@
                     <label class="vis-check"><input type="checkbox" id="show-dynamic" checked> Show</label>
                 </div>
                 <div class="type-selector">
-                    <div class="type-option">
+                    <div class="type-option" id="option-hr">
                         <input type="radio" id="select-hr" name="stat-type" value="hr" checked>
                         <label for="select-hr">HR</label>
                     </div>
-                    <div class="type-option">
+                    <div class="type-option" id="option-steps">
                         <input type="radio" id="select-steps" name="stat-type" value="steps">
                         <label for="select-steps">Steps</label>
+                    </div>
+                    <div class="type-option" id="option-power" style="display:none;">
+                        <input type="radio" id="select-power" name="stat-type" value="power">
+                        <label for="select-power">Power</label>
                     </div>
                 </div>
                 <input type="text" id="dynamic-input" value="154">
@@ -353,7 +375,7 @@
     <div class="preview-wrapper">
         <div id="stat-card">
             <div class="logo-wrapper">
-                <img src="strav_logo.png" alt="Strava Logo">
+                <img id="strava-logo-img" src="strav_logo.png" alt="Strava Logo">
             </div>
             
             <div class="stat-grid">
@@ -362,16 +384,12 @@
                     <div class="stat-value" id="val-distance">20.26 km</div>
                 </div>
                 <div class="stat-box" id="box-pace">
-                    <div class="stat-label">Pace</div>
+                    <div class="stat-label" id="card-label-pace">Pace</div>
                     <div class="stat-value" id="val-pace">6:21 /km</div>
                 </div>
                 <div class="stat-box" id="box-time">
                     <div class="stat-label">Time</div>
                     <div class="stat-value" id="val-time">2h 8m</div>
-                </div>
-                <div class="stat-box" id="box-cal">
-                    <div class="stat-label">Cal</div>
-                    <div class="stat-value" id="val-cal">750 Cal</div>
                 </div>
                 <div class="stat-box" id="box-elev">
                     <div class="stat-label">Elev Gain</div>
@@ -380,6 +398,10 @@
                 <div class="stat-box" id="box-dynamic">
                     <div class="stat-label" id="val-dynamic-label">Avg HR</div>
                     <div class="stat-value" id="val-dynamic-value">154 bpm</div>
+                </div>
+                <div class="stat-box" id="box-cal">
+                    <div class="stat-label">Cal</div>
+                    <div class="stat-value" id="val-cal">750 Cal</div>
                 </div>
             </div>
         </div>
@@ -400,14 +422,28 @@
     <div id="toast">Berhasil disalin!</div>
 
     <script>
+        const modeRun = document.getElementById('mode-run');
+        const modeRide = document.getElementById('mode-ride');
+        const logoImg = document.getElementById('strava-logo-img');
+        const labelPaceSpeed = document.getElementById('label-pace-speed');
+        const cardLabelPace = document.getElementById('card-label-pace');
+        
+        const containerPaceInputs = document.getElementById('container-pace-inputs');
+        const containerSpeedInput = document.getElementById('container-speed-input');
+
         const inputDistance = document.getElementById('distance');
         const inputPaceMin = document.getElementById('pace-min');
         const inputPaceSec = document.getElementById('pace-sec');
+        const inputSpeedVal = document.getElementById('speed-val');
         const inputTime = document.getElementById('time-display');
         const inputCalories = document.getElementById('calories');
         const inputElevGain = document.getElementById('elev-gain');
+        
         const radioHR = document.getElementById('select-hr');
         const radioSteps = document.getElementById('select-steps');
+        const radioPower = document.getElementById('select-power');
+        const optionSteps = document.getElementById('option-steps');
+        const optionPower = document.getElementById('option-power');
         const inputDynamic = document.getElementById('dynamic-input');
 
         const checkDist = document.getElementById('show-dist');
@@ -435,13 +471,21 @@
 
         function autoCalculateTime() {
             const distance = parseFloat(inputDistance.value) || 0;
-            const paceMin = parseInt(inputPaceMin.value) || 0;
-            const paceSec = parseInt(inputPaceSec.value) || 0;
+            let totalTimeSeconds = 0;
 
-            if (distance <= 0 || (paceMin === 0 && paceSec === 0)) return;
-
-            const totalPaceSeconds = (paceMin * 60) + paceSec;
-            const totalTimeSeconds = Math.round(distance * totalPaceSeconds);
+            if (modeRun.checked) {
+                const paceMin = parseInt(inputPaceMin.value) || 0;
+                const paceSec = parseInt(inputPaceSec.value) || 0;
+                if (distance <= 0 || (paceMin === 0 && paceSec === 0)) return;
+                
+                const totalPaceSeconds = (paceMin * 60) + paceSec;
+                totalTimeSeconds = Math.round(distance * totalPaceSeconds);
+            } else {
+                const speed = parseFloat(inputSpeedVal.value) || 0;
+                if (distance <= 0 || speed <= 0) return;
+                
+                totalTimeSeconds = Math.round((distance / speed) * 3600);
+            }
 
             const hours = Math.floor(totalTimeSeconds / 3600);
             const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
@@ -453,21 +497,44 @@
                 if (minutes > 0) timeString += ` ${minutes}m`;
             } else {
                 if (minutes > 0) timeString += `${minutes}m `;
-                timeString += `${seconds}s`;
+                if (seconds > 0 || minutes === 0) timeString += `${seconds}s`;
             }
             
-            inputTime.value = timeString;
-            valTime.innerText = timeString;
+            inputTime.value = timeString.trim();
+            valTime.innerText = timeString.trim();
         }
 
         function updateCardText() {
+            if (modeRun.checked) {
+                logoImg.src = "strav_logo.png";
+                labelPaceSpeed.innerText = "Pace";
+                cardLabelPace.innerText = "Pace";
+                containerPaceInputs.classList.remove('hidden-box');
+                containerSpeedInput.classList.add('hidden-box');
+                
+                optionSteps.style.display = "block";  
+                optionPower.style.display = "none";   
+                if (radioPower.checked) radioHR.checked = true;
+
+                const pMin = inputPaceMin.value || "0";
+                let pSec = inputPaceSec.value || "0";
+                if (parseInt(pSec) < 10 && pSec.length === 1) pSec = "0" + pSec;
+                valPace.innerText = `${pMin}:${pSec} /km`;
+            } else {
+                logoImg.src = "sepeda.png";
+                labelPaceSpeed.innerText = "Speed";
+                cardLabelPace.innerText = "Speed";
+                containerPaceInputs.classList.add('hidden-box');
+                containerSpeedInput.classList.remove('hidden-box');
+                
+                optionSteps.style.display = "none";   
+                optionPower.style.display = "block";  
+                if (radioSteps.checked) radioPower.checked = true;
+
+                valPace.innerText = `${parseFloat(inputSpeedVal.value) || 0} km/h`;
+            }
+
             valDistance.innerText = `${parseFloat(inputDistance.value) || 0} km`;
-
-            const pMin = inputPaceMin.value || "0";
-            let pSec = inputPaceSec.value || "0";
-            if (parseInt(pSec) < 10 && pSec.length === 1) pSec = "0" + pSec;
-            valPace.innerText = `${pMin}:${pSec} /km`;
-
             valTime.innerText = inputTime.value;
             valCal.innerText = inputCalories.value ? `${inputCalories.value} Cal` : "0 Cal";
             valElev.innerText = `${inputElevGain.value || 0} m`;
@@ -475,11 +542,14 @@
             if (radioHR.checked) {
                 valDynamicLabel.innerText = "Avg HR";
                 valDynamicValue.innerText = `${inputDynamic.value || 0} bpm`;
-            } else {
+            } else if (radioSteps.checked && modeRun.checked) {
                 valDynamicLabel.innerText = "Steps";
                 const rawSteps = inputDynamic.value || "0";
                 const formattedSteps = isNaN(rawSteps.replace(/,/g, '')) ? rawSteps : Number(rawSteps.replace(/,/g, '')).toLocaleString('en-US');
                 valDynamicValue.innerText = formattedSteps;
+            } else if (radioPower.checked && modeRide.checked) {
+                valDynamicLabel.innerText = "Avg Power";
+                valDynamicValue.innerText = `${inputDynamic.value || 0} W`;
             }
 
             checkDist.checked ? boxDist.classList.remove('hidden-box') : boxDist.classList.add('hidden-box');
@@ -490,7 +560,29 @@
             checkDynamic.checked ? boxDynamic.classList.remove('hidden-box') : boxDynamic.classList.add('hidden-box');
         }
 
-        [inputDistance, inputPaceMin, inputPaceSec].forEach(el => {
+        [modeRun, modeRide].forEach(el => {
+            el.addEventListener('change', () => {
+                if (modeRide.checked) {
+                    inputDistance.value = "12.03";
+                    inputTime.value = "55m 12s";
+                    inputElevGain.value = "17";
+                    inputCalories.value = "319";
+                    inputDynamic.value = "34";
+                    radioPower.checked = true;
+                } else {
+                    inputDistance.value = "20.26";
+                    inputTime.value = "2h 8m";
+                    inputElevGain.value = "13";
+                    inputCalories.value = "750";
+                    inputDynamic.value = "154";
+                    radioHR.checked = true;
+                }
+                autoCalculateTime();
+                updateCardText();
+            });
+        });
+
+        [inputDistance, inputPaceMin, inputPaceSec, inputSpeedVal].forEach(el => {
             el.addEventListener('input', () => {
                 autoCalculateTime();
                 updateCardText();
@@ -501,9 +593,20 @@
             el.addEventListener('input', updateCardText);
         });
 
-        [checkDist, checkPace, checkTime, checkCal, checkElev, checkDynamic, radioHR, radioSteps].forEach(el => {
+        [checkDist, checkPace, checkTime, checkCal, checkElev, checkDynamic, radioHR, radioSteps, radioPower].forEach(el => {
             el.addEventListener('change', updateCardText);
         });
+
+        // Setup awal: Set default ke mode LARI saat pertama kali dibuka
+        modeRun.checked = true;
+        inputDistance.value = "20.26";
+        inputPaceMin.value = "6";
+        inputPaceSec.value = "21";
+        inputTime.value = "2h 8m";
+        inputElevGain.value = "13";
+        inputCalories.value = "750";
+        inputDynamic.value = "154";
+        radioHR.checked = true;
 
         autoCalculateTime();
         updateCardText();
