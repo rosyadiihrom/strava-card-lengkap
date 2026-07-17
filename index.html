@@ -4,8 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strava Stat Generator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* --- DEKLARASI FONT BOATHOUSE LOKAL --- */
+        @font-face {
+            font-family: 'Boathouse';
+            /* Sesuaikan ekstensi file di bawah ini jika menggunakan .ttf atau .woff */
+            src: url('boathouse.woff2') format('woff2'),
+                 url('boathouse.woff') format('woff'),
+                 url('boathouse.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -13,7 +23,8 @@
         }
 
         body {
-            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            /* Menggunakan font utama Boathouse dan melebarkan jarak antarhuruf default secara global */
+            font-family: 'Boathouse', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #0e1111;
             color: #ffffff;
             padding: 12px 8px;
@@ -21,6 +32,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            letter-spacing: 0.03em;
         }
 
         .container {
@@ -39,6 +51,7 @@
             color: #fc5200;
             text-align: center;
             font-weight: 700;
+            letter-spacing: 0.05em;
         }
 
         .form-row {
@@ -160,7 +173,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Boathouse', sans-serif;
             box-sizing: border-box;
             transform: scaleY(0.9);
             transform-origin: center center;
@@ -206,7 +219,7 @@
             font-weight: 500;
             color: rgba(255, 255, 255, 0.7);
             margin-bottom: 3px;
-            letter-spacing: 0.01em;
+            letter-spacing: 0.04em;
         }
 
         .stat-value {
@@ -214,8 +227,8 @@
             font-weight: 600; 
             color: #ffffff;
             white-space: nowrap;
-            letter-spacing: -0.01em;
             line-height: 1.1;
+            letter-spacing: 0.02em; /* Spasi karakter angka statistik */
         }
 
         /* Tombol Aksi */
@@ -241,6 +254,7 @@
             justify-content: center;
             gap: 8px;
             font-family: inherit;
+            letter-spacing: 0.04em;
         }
 
         .btn-download { background-color: #fc5200; color: white; }
@@ -261,6 +275,7 @@
             transition: opacity 0.3s;
             pointer-events: none;
             z-index: 100;
+            letter-spacing: 0.03em;
         }
         #toast.show { opacity: 1; }
 
@@ -527,7 +542,7 @@
                 containerPaceInputs.classList.add('hidden-box');
                 containerSpeedInput.classList.remove('hidden-box');
                 
-                optionSteps.style.display = "none";   
+                optionSteps.style.display = "none";    
                 optionPower.style.display = "block";  
                 if (radioSteps.checked) radioPower.checked = true;
 
@@ -597,7 +612,7 @@
             el.addEventListener('change', updateCardText);
         });
 
-        // Setup awal: Set default ke mode LARI saat pertama kali dibuka
+        // Setup awal
         modeRun.checked = true;
         inputDistance.value = "20.26";
         inputPaceMin.value = "6";
