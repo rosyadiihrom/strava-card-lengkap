@@ -294,7 +294,7 @@
     <div class="container">
         <h2>Strava Stat Generator</h2>
         
-        <!-- Pilihan Mode Aktivitas -->
+        <!-- Pilihan Mode Aktivitas dan Tampilkan Logo -->
         <div class="form-row">
             <div class="input-group" style="flex-direction: row; align-items: center; justify-content: space-between; padding: 10px;">
                 <span style="font-size: 0.8rem; font-weight: 600; color: #9ca3af;">Activity Type:</span>
@@ -308,6 +308,14 @@
                         <label for="mode-ride">Cycling</label>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Tambahan Fitur Sembunyikan/Tampilkan Logo Strava -->
+        <div class="form-row">
+            <div class="input-group" style="flex-direction: row; align-items: center; justify-content: space-between; padding: 10px;">
+                <span style="font-size: 0.8rem; font-weight: 600; color: #9ca3af;">Strava Logo:</span>
+                <label class="vis-check" style="font-size: 0.8rem;"><input type="checkbox" id="show-logo" checked> Tampilkan Logo</label>
             </div>
         </div>
         
@@ -344,6 +352,7 @@
                 <input type="text" id="time-display" value="2h 8m">
             </div>
 
+            <!-- Input Calories -->
             <div class="input-group">
                 <div class="group-header">
                     <label for="calories">Calories</label>
@@ -354,6 +363,7 @@
         </div>
 
         <div class="form-row" style="margin-bottom: 0;">
+            <!-- Input Elev Gain -->
             <div class="input-group">
                 <div class="group-header">
                     <label for="elev-gain">Elev Gain</label>
@@ -389,34 +399,40 @@
     <div style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 4px; font-weight: 500; width:100%; max-width:480px; text-align:left; padding-left:4px;">Live Preview (Transparan):</div>
     <div class="preview-wrapper">
         <div id="stat-card">
-            <div class="logo-wrapper">
+            <div class="logo-wrapper" id="logo-container">
                 <img id="strava-logo-img" src="strav_logo.png" alt="Strava Logo">
             </div>
             
             <div class="stat-grid">
+                <!-- Kolom 1: Distance -->
                 <div class="stat-box" id="box-dist">
                     <div class="stat-label">Distance</div>
                     <div class="stat-value" id="val-distance">20.26 km</div>
                 </div>
+                <!-- Kolom 2: Pace -->
                 <div class="stat-box" id="box-pace">
                     <div class="stat-label" id="card-label-pace">Pace</div>
                     <div class="stat-value" id="val-pace">6:21 /km</div>
                 </div>
+                <!-- Kolom 3: Time -->
                 <div class="stat-box" id="box-time">
                     <div class="stat-label">Time</div>
                     <div class="stat-value" id="val-time">2h 8m</div>
                 </div>
+                <!-- Kolom 4: Calories (Pindah Kesini) -->
+                <div class="stat-box" id="box-cal">
+                    <div class="stat-label">Cal</div>
+                    <div class="stat-value" id="val-cal">750 Cal</div>
+                </div>
+                <!-- Kolom 5: Elev Gain -->
                 <div class="stat-box" id="box-elev">
                     <div class="stat-label">Elev Gain</div>
                     <div class="stat-value" id="val-elev">13 m</div>
                 </div>
+                <!-- Kolom 6: Dynamic (HR/Steps/Power) -->
                 <div class="stat-box" id="box-dynamic">
                     <div class="stat-label" id="val-dynamic-label">Avg HR</div>
                     <div class="stat-value" id="val-dynamic-value">154 bpm</div>
-                </div>
-                <div class="stat-box" id="box-cal">
-                    <div class="stat-label">Cal</div>
-                    <div class="stat-value" id="val-cal">750 Cal</div>
                 </div>
             </div>
         </div>
@@ -440,6 +456,7 @@
         const modeRun = document.getElementById('mode-run');
         const modeRide = document.getElementById('mode-ride');
         const logoImg = document.getElementById('strava-logo-img');
+        const logoContainer = document.getElementById('logo-container');
         const labelPaceSpeed = document.getElementById('label-pace-speed');
         const cardLabelPace = document.getElementById('card-label-pace');
         
@@ -461,6 +478,7 @@
         const optionPower = document.getElementById('option-power');
         const inputDynamic = document.getElementById('dynamic-input');
 
+        const checkLogo = document.getElementById('show-logo');
         const checkDist = document.getElementById('show-dist');
         const checkPace = document.getElementById('show-pace');
         const checkTime = document.getElementById('show-time');
@@ -567,6 +585,10 @@
                 valDynamicValue.innerText = `${inputDynamic.value || 0} W`;
             }
 
+            // Kontrol visibilitas logo
+            checkLogo.checked ? logoContainer.classList.remove('hidden-box') : logoContainer.classList.add('hidden-box');
+
+            // Kontrol visibilitas box statistik
             checkDist.checked ? boxDist.classList.remove('hidden-box') : boxDist.classList.add('hidden-box');
             checkPace.checked ? boxPace.classList.remove('hidden-box') : boxPace.classList.add('hidden-box');
             checkTime.checked ? boxTime.classList.remove('hidden-box') : boxTime.classList.add('hidden-box');
@@ -608,7 +630,7 @@
             el.addEventListener('input', updateCardText);
         });
 
-        [checkDist, checkPace, checkTime, checkCal, checkElev, checkDynamic, radioHR, radioSteps, radioPower].forEach(el => {
+        [checkLogo, checkDist, checkPace, checkTime, checkCal, checkElev, checkDynamic, radioHR, radioSteps, radioPower].forEach(el => {
             el.addEventListener('change', updateCardText);
         });
 
