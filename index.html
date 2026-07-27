@@ -9,7 +9,6 @@
         /* --- DEKLARASI FONT BOATHOUSE LOKAL --- */
         @font-face {
             font-family: 'Boathouse';
-            /* Sesuaikan ekstensi file di bawah ini jika menggunakan .ttf atau .woff */
             src: url('boathouse.woff2') format('woff2'),
                  url('boathouse.woff') format('woff'),
                  url('boathouse.ttf') format('truetype');
@@ -24,7 +23,6 @@
         }
 
         body {
-            /* Mengubah font default utama menjadi Boathouse */
             font-family: 'Boathouse', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #0e1111;
             color: #ffffff;
@@ -172,7 +170,6 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            /* Mengubah target font kartu menjadi Boathouse */
             font-family: 'Boathouse', sans-serif;
             box-sizing: border-box;
             transform: scaleY(0.75);
@@ -419,7 +416,7 @@
                     <div class="stat-label">Time</div>
                     <div class="stat-value" id="val-time">2h 8m</div>
                 </div>
-                <!-- Kolom 4: Calories (Pindah Kesini) -->
+                <!-- Kolom 4: Calories -->
                 <div class="stat-box" id="box-cal">
                     <div class="stat-label">Cal</div>
                     <div class="stat-value" id="val-cal">750 Cal</div>
@@ -567,7 +564,11 @@
                 valPace.innerText = `${parseFloat(inputSpeedVal.value) || 0} km/h`;
             }
 
-            valDistance.innerText = `${parseFloat(inputDistance.value) || 0} km`;
+            // Menampilkan nilai jarak selalu dengan 2 digit desimal (.toFixed(2))
+            const rawDist = parseFloat(inputDistance.value);
+            const formattedDist = isNaN(rawDist) ? "0.00" : rawDist.toFixed(2);
+            valDistance.innerText = `${formattedDist} km`;
+
             valTime.innerText = inputTime.value;
             valCal.innerText = inputCalories.value ? `${inputCalories.value} Cal` : "0 Cal";
             valElev.innerText = `${inputElevGain.value || 0} m`;
@@ -624,6 +625,14 @@
                 autoCalculateTime();
                 updateCardText();
             });
+        });
+
+        // Event listener saat pengguna selesai mengetik/meninggalkan kolom distance (blur)
+        inputDistance.addEventListener('change', () => {
+            const val = parseFloat(inputDistance.value);
+            if (!isNaN(val)) {
+                inputDistance.value = val.toFixed(2);
+            }
         });
 
         [inputTime, inputCalories, inputElevGain, inputDynamic].forEach(el => {
