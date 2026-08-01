@@ -213,12 +213,13 @@
             display: none !important;
         }
 
+        /* Penyesuaian Tipografi dengan unit px & Tanpa Uppercase */
         .stat-label {
             font-size: 8pt;
             font-weight: 500;
             color: #ffffff;
             margin-bottom: 3px;
-            letter-spacing: 0.001em;
+            letter-spacing: 0.3px;
         }
 
         .stat-value {
@@ -226,7 +227,7 @@
             font-weight: 500; 
             color: #ffffff;
             white-space: nowrap;
-            letter-spacing: -0.001em;
+            letter-spacing: -0.4px;
             line-height: 1.1;
         }
 
@@ -564,7 +565,6 @@
                 valPace.innerText = `${parseFloat(inputSpeedVal.value) || 0} km/h`;
             }
 
-            // Menampilkan nilai jarak selalu dengan 2 digit desimal (.toFixed(2))
             const rawDist = parseFloat(inputDistance.value);
             const formattedDist = isNaN(rawDist) ? "0.00" : rawDist.toFixed(2);
             valDistance.innerText = `${formattedDist} km`;
@@ -586,10 +586,8 @@
                 valDynamicValue.innerText = `${inputDynamic.value || 0} W`;
             }
 
-            // Kontrol visibilitas logo
             checkLogo.checked ? logoContainer.classList.remove('hidden-box') : logoContainer.classList.add('hidden-box');
 
-            // Kontrol visibilitas box statistik
             checkDist.checked ? boxDist.classList.remove('hidden-box') : boxDist.classList.add('hidden-box');
             checkPace.checked ? boxPace.classList.remove('hidden-box') : boxPace.classList.add('hidden-box');
             checkTime.checked ? boxTime.classList.remove('hidden-box') : boxTime.classList.add('hidden-box');
@@ -627,7 +625,6 @@
             });
         });
 
-        // Event listener saat pengguna selesai mengetik/meninggalkan kolom distance (blur)
         inputDistance.addEventListener('change', () => {
             const val = parseFloat(inputDistance.value);
             if (!isNaN(val)) {
@@ -643,7 +640,6 @@
             el.addEventListener('change', updateCardText);
         });
 
-        // Setup awal
         modeRun.checked = true;
         inputDistance.value = "20.26";
         inputPaceMin.value = "6";
